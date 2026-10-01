@@ -12,10 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { QrCode, Eye, EyeOff, LogIn } from "lucide-react";
+import { QrCode, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
-export default function LoginPage() {
+export default function SignupPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,16 +31,16 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  async function handleLogin(e) {
+  async function handleSignup(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
@@ -48,7 +49,7 @@ export default function LoginPage() {
         setUser(data.user);
         router.push("/dashboard");
       } else {
-        setError(data.error || "Invalid credentials");
+        setError(data.error || "Failed to create account");
       }
     } catch {
       setError("Network error. Please try again.");
@@ -72,13 +73,26 @@ export default function LoginPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardTitle className="text-2xl">Create your account</CardTitle>
             <CardDescription>
-              Sign in to your account to manage your QR codes
+              Start managing dynamic QR codes for free
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  autoComplete="name"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -98,11 +112,12 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    autoComplete="current-password"
+                    minLength={6}
+                    autoComplete="new-password"
                     className="pr-10"
                   />
                   <button
@@ -117,6 +132,9 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Must be at least 6 characters
+                </p>
               </div>
 
               {error && (
@@ -129,24 +147,24 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Signing in...
+                    Creating account...
                   </>
                 ) : (
                   <>
-                    <LogIn className="h-4 w-4" />
-                    Sign In
+                    <UserPlus className="h-4 w-4" />
+                    Create Account
                   </>
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/signup"
+                href="/login"
                 className="text-foreground font-medium hover:underline"
               >
-                Sign up for free
+                Sign in
               </Link>
             </div>
           </CardContent>
